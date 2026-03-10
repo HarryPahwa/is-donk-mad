@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Is Donk Mad?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --accent-calm: #4fc3f7;
+      --accent-mad: #ff4444;
+      --text: #f0f0f0;
+      --muted: #888;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0e0e0e;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      transition: background 0.6s ease;
+    }
+
+    body.mad-state  { background: #150505; }
+    body.calm-state { background: #050e15; }
+
+    h1 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      margin-bottom: 50px;
+      text-align: center;
+    }
+
+    .status-orb {
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
+      font-size: 3rem;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 3px solid transparent;
+      user-select: none;
+    }
+
+    .status-orb.calm {
+      background: radial-gradient(circle at 40% 35%, #1e4a6e, #0a1f30);
+      border-color: var(--accent-calm);
+      box-shadow: 0 0 60px rgba(79,195,247,0.25), inset 0 0 40px rgba(79,195,247,0.05);
+    }
+
+    .status-orb.mad {
+      background: radial-gradient(circle at 40% 35%, #6e1e1e, #300a0a);
+      border-color: var(--accent-mad);
+      box-shadow: 0 0 60px rgba(255,68,68,0.35), inset 0 0 40px rgba(255,68,68,0.08);
+      animation: pulse-mad 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse-mad {
+      0%, 100% { box-shadow: 0 0 60px rgba(255,68,68,0.35), inset 0 0 40px rgba(255,68,68,0.08); }
+      50%       { box-shadow: 0 0 90px rgba(255,68,68,0.55), inset 0 0 40px rgba(255,68,68,0.15); }
+    }
+
+    .status-orb:active { transform: scale(0.95); }
+    .status-orb:hover  { transform: scale(1.04); }
+
+    .orb-label {
+      font-size: 0.7rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 8px;
+      opacity: 0.7;
+    }
+
+    .status-text {
+      font-size: 1.2rem; font-weight: 700; letter-spacing: 1px;
+      margin-bottom: 6px; transition: color 0.4s;
+    }
+    .status-text.calm { color: var(--accent-calm); }
+    .status-text.mad  { color: var(--accent-mad); }
+
+    .since-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem; color: var(--muted);
+      margin-bottom: 40px; text-align: center;
+    }
+
+    .toggle-btn {
+      padding: 14px 40px; border-radius: 4px; border: 2px solid;
+      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+      letter-spacing: 1px; cursor: pointer; background: transparent;
+      transition: all 0.3s ease; margin-bottom: 50px;
+    }
+    .toggle-btn.set-mad        { border-color: var(--accent-mad);  color: var(--accent-mad); }
+    .toggle-btn.set-mad:hover  { background: var(--accent-mad);    color: #fff; }
+    .toggle-btn.set-calm       { border-color: var(--accent-calm); color: var(--accent-calm); }
+    .toggle-btn.set-calm:hover { background: var(--accent-calm);   color: #000; }
+
+    .stats-section { width: 100%; max-width: 600px; }
+
+    .stats-title {
+      font-size: 0.7rem; font-family: 'Space Mono', monospace;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 20px;
+    }
+
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px; margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: #161616; border: 1px solid #2a2a2a;
+      border-radius: 6px; padding: 16px; text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.8rem; font-weight: 800;
+      display: block; margin-bottom: 4px;
+    }
+    .stat-number.mad-color  { color: var(--accent-mad); }
+    .stat-number.calm-color { color: var(--accent-calm); }
+
+    .stat-label {
+      font-family: 'Space Mono', monospace; font-size: 0.6rem;
+      color: var(--muted); letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    .history-header {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 20px;
+    }
+    .history-header .stats-title { margin-bottom: 0; }
+
+    .clear-btn {
+      font-family: 'Space Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: #555; background: transparent;
+      border: 1px solid #333; border-radius: 3px;
+      padding: 5px 10px; cursor: pointer; transition: all 0.2s;
+    }
+    .clear-btn:hover { color: var(--accent-mad); border-color: var(--accent-mad); }
+
+    .history-list {
+      display: flex; flex-direction: column;
+      gap: 8px; max-height: 260px; overflow-y: auto;
+    }
+    .history-list::-webkit-scrollbar       { width: 4px; }
+    .history-list::-webkit-scrollbar-track { background: #111; }
+    .history-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    .history-item {
+      display: flex; align-items: center; gap: 12px;
+      background: #131313; border: 1px solid #222;
+      border-radius: 4px; padding: 10px 14px;
+      font-family: 'Space Mono', monospace; font-size: 0.7rem;
+    }
+    .history-dot      { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .history-dot.mad  { background: var(--accent-mad); }
+    .history-dot.calm { background: var(--accent-calm); }
+    .history-state    { color: var(--text); flex: 1; }
+    .history-time     { color: var(--muted); }
+
+    .ntfy-section {
+      width: 100%; max-width: 600px;
+      margin-top: 30px; background: #111;
+      border: 1px dashed #2a2a2a; border-radius: 6px; padding: 20px;
+    }
+    .ntfy-section label {
+      font-family: 'Space Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); display: block; margin-bottom: 8px;
+    }
+    .ntfy-row { display: flex; gap: 8px; }
+    .ntfy-input {
+      flex: 1; background: #1a1a1a; border: 1px solid #333;
+      border-radius: 4px; color: var(--text);
+      padding: 10px 12px; font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    }
+    .ntfy-input:focus { outline: none; border-color: #555; }
+    .ntfy-save {
+      padding: 10px 18px; background: #222; border: 1px solid #444;
+      border-radius: 4px; color: var(--text);
+      font-family: 'Syne', sans-serif; font-size: 0.8rem;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .ntfy-save:hover { background: #2e2e2e; }
+    .ntfy-hint {
+      margin-top: 8px; font-family: 'Space Mono', monospace;
+      font-size: 0.6rem; color: var(--muted);
+    }
+
+    .toast {
+      position: fixed; bottom: 30px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1e1e1e; border: 1px solid #333;
+      border-radius: 4px; padding: 12px 24px;
+      font-family: 'Space Mono', monospace; font-size: 0.75rem;
+      opacity: 0; transition: all 0.35s ease;
+      z-index: 999; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body class="calm-state">
+
+  <h1>Is Donk Mad? 😤</h1>
+  <p class="subtitle">// real-time donk mood tracker</p>
+
+  <div class="status-orb calm" id="statusOrb" onclick="toggleState()">
+    <span id="orbEmoji">😊</span>
+    <span class="orb-label">tap to toggle</span>
+  </div>
+
+  <div class="status-text calm" id="statusText">NOT MAD</div>
+  <div class="since-text" id="sinceText">Loading...</div>
+
+  <button class="toggle-btn set-mad" id="toggleBtn" onclick="toggleState()">
+    MARK AS MAD 😤
+  </button>
+
+  <div class="stats-section">
+    <div class="stats-title">// statistics</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-number mad-color" id="statMadCount">—</span>
+        <span class="stat-label">Mad Events</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number calm-color" id="statMadPct">—</span>
+        <span class="stat-label">% Time Mad</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="statLongest">—</span>
+        <span class="stat-label">Longest Streak</span>
+      </div>
+    </div>
+
+    <div class="history-header">
+      <div class="stats-title">// recent history</div>
+      <button class="clear-btn" onclick="clearHistory()">🗑 Clear History</button>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="history-item">
+        <div class="history-dot calm"></div>
+        <span class="history-state">Loading history...</span>
+        <span class="history-time"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ntfy-section">
+    <label>📱 phone notifications (via ntfy.sh)</label>
+    <div class="ntfy-row">
+      <input type="text" class="ntfy-input" id="ntfyTopic" placeholder="your-unique-topic-name" />
+      <button class="ntfy-save" onclick="saveTopic()">Save</button>
+    </div>
+    <div class="ntfy-hint">
+      1. Install the <strong>ntfy</strong> app → subscribe to your topic name above<br>
+      2. Notifications fire on every state change automatically
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Firebase via ES modules — the official recommended approach -->
+  <script type="module">
+    import { initializeApp }                          from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc,
+             getDocs, orderBy, query, limit,
+             writeBatch, doc }                        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ============================================================
+    // CONFIG
+    // ============================================================
+    const firebaseConfig = {
+      apiKey:            "AIzaSyAuUjPMQ0zvLUi7hDWpG43Z9MugfbpamTU",
+      authDomain:        "is-donk-mad.firebaseapp.com",
+      projectId:         "is-donk-mad",
+      storageBucket:     "is-donk-mad.firebasestorage.app",
+      messagingSenderId: "704625373718",
+      appId:             "1:704625373718:web:5c337f7c6cb4dd9e7c3b37",
+      measurementId:     "G-Y5Y8CJHWDW"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let isMad      = false;
+    let history    = [];
+    let ntfyTopic  = localStorage.getItem('ntfyTopic') || '';
+    if (ntfyTopic) document.getElementById('ntfyTopic').value = ntfyTopic;
+
+    // Load history
+    try {
+      const q    = query(collection(db, "events"), orderBy("timestamp", "desc"), limit(100));
+      const snap = await getDocs(q);
+      history    = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (history.length > 0) isMad = history[0].state === 'mad';
+    } catch(e) {
+      console.error("Firestore load error:", e);
+      document.getElementById('sinceText').textContent = 'DB error: ' + e.message;
+    }
+    renderAll();
+
+    // ============================================================
+    // TOGGLE
+    // ============================================================
+    window.toggleState = async function() {
+      isMad = !isMad;
+      const event = { state: isMad ? 'mad' : 'calm', timestamp: Date.now() };
+      history.unshift(event);
+      renderAll();
+      showToast(isMad ? "😤 Marked as MAD" : "😊 Marked as CALM");
+      try {
+        const ref    = await addDoc(collection(db, "events"), event);
+        history[0].id = ref.id;
+      } catch(e) { console.warn("Write failed:", e); }
+      await sendNotification(isMad);
+    };
+
+    // ============================================================
+    // CLEAR HISTORY
+    // ============================================================
+    window.clearHistory = async function() {
+      if (!confirm("Delete ALL history? This cannot be undone.")) return;
+      try {
+        const snap  = await getDocs(collection(db, "events"));
+        const batch = writeBatch(db);
+        snap.docs.forEach(d => batch.delete(doc(db, "events", d.id)));
+        await batch.commit();
+        history = [];
+        isMad   = false;
+        renderAll();
+        showToast("🗑 History cleared");
+      } catch(e) { console.error("Clear failed:", e); }
+    };
+
+    // ============================================================
+    // NTFY
+    // ============================================================
+    async function sendNotification(mad) {
+      const topic = ntfyTopic.trim();
+      if (!topic) return;
+      try {
+        await fetch(`https://ntfy.sh/${topic}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            topic,
+            title:   mad ? "😤 Donk is MAD" : "😊 Donk has calmed down",
+            message: mad ? "Donk is currently mad at you. Good luck." : "Anger resolved. You're in the clear.",
+            priority: mad ? 5 : 3,
+            tags: mad ? ["rage"] : ["white_check_mark"]
+          })
+        });
+      } catch(e) { console.warn("ntfy failed:", e); }
+    }
+
+    window.saveTopic = function() {
+      ntfyTopic = document.getElementById('ntfyTopic').value.trim();
+      localStorage.setItem('ntfyTopic', ntfyTopic);
+      showToast("📱 Notification topic saved!");
+    };
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function renderAll() {
+      const orb        = document.getElementById('statusOrb');
+      const statusText = document.getElementById('statusText');
+      const emoji      = document.getElementById('orbEmoji');
+      const btn        = document.getElementById('toggleBtn');
+      const sinceText  = document.getElementById('sinceText');
+
+      if (isMad) {
+        orb.className        = 'status-orb mad';
+        statusText.className = 'status-text mad';
+        statusText.textContent = 'MAD 😤';
+        emoji.textContent    = '😤';
+        btn.className        = 'toggle-btn set-calm';
+        btn.textContent      = 'MARK AS CALM 😊';
+        document.body.className = 'mad-state';
+      } else {
+        orb.className        = 'status-orb calm';
+        statusText.className = 'status-text calm';
+        statusText.textContent = 'NOT MAD 😊';
+        emoji.textContent    = '😊';
+        btn.className        = 'toggle-btn set-mad';
+        btn.textContent      = 'MARK AS MAD 😤';
+        document.body.className = 'calm-state';
+      }
+
+      sinceText.textContent = history.length > 0
+        ? `Since: ${timeAgo(history[0].timestamp)}`
+        : 'No events recorded yet';
+
+      renderStats();
+      renderHistory();
+    }
+
+    function renderStats() {
+      const madEvents = history.filter(h => h.state === 'mad');
+      document.getElementById('statMadCount').textContent = madEvents.length || '0';
+
+      if (history.length > 1) {
+        let madMs = 0;
+        for (let i = 0; i < history.length - 1; i++) {
+          if (history[i].state === 'mad') madMs += history[i].timestamp - history[i+1].timestamp;
+        }
+        const totalMs = history[0].timestamp - history[history.length-1].timestamp;
+        document.getElementById('statMadPct').textContent =
+          totalMs > 0 ? Math.round((madMs / totalMs) * 100) + '%' : '0%';
+      } else {
+        document.getElementById('statMadPct').textContent = '—';
+      }
+
+      let longest = 0, current = 0;
+      for (const h of history) {
+        if (h.state === 'mad') { current++; longest = Math.max(longest, current); }
+        else current = 0;
+      }
+      document.getElementById('statLongest').textContent = longest > 0 ? longest : '—';
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      if (history.length === 0) {
+        list.innerHTML = `<div class="history-item">
+          <div class="history-dot calm"></div>
+          <span class="history-state">No history yet</span>
+          <span class="history-time"></span></div>`;
+        return;
+      }
+      list.innerHTML = history.slice(0, 20).map(h => `
+        <div class="history-item">
+          <div class="history-dot ${h.state}"></div>
+          <span class="history-state">${h.state === 'mad' ? '😤 Gone mad' : '😊 Calmed down'}</span>
+          <span class="history-time">${timeAgo(h.timestamp)}</span>
+        </div>`).join('');
+    }
+
+    function timeAgo(ts) {
+      const d = Date.now() - ts;
+      if (d < 60000)    return 'just now';
+      if (d < 3600000)  return Math.floor(d / 60000) + 'm ago';
+      if (d < 86400000) return Math.floor(d / 3600000) + 'h ago';
+      return Math.floor(d / 86400000) + 'd ago';
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+  </script>
+</body>
+</html>
