@@ -185,24 +185,15 @@
     .ntfy-section label {
       font-family: 'Space Mono', monospace; font-size: 0.65rem;
       letter-spacing: 2px; text-transform: uppercase;
-      color: var(--muted); display: block; margin-bottom: 8px;
+      color: var(--muted); display: block; margin-bottom: 10px;
     }
-    .ntfy-row { display: flex; gap: 8px; }
-    .ntfy-input {
-      flex: 1; background: #1a1a1a; border: 1px solid #333;
-      border-radius: 4px; color: var(--text);
-      padding: 10px 12px; font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    .ntfy-topic-display {
+      font-family: 'Space Mono', monospace; font-size: 0.85rem;
+      color: var(--accent-calm); letter-spacing: 1px;
+      margin-bottom: 10px;
     }
-    .ntfy-input:focus { outline: none; border-color: #555; }
-    .ntfy-save {
-      padding: 10px 18px; background: #222; border: 1px solid #444;
-      border-radius: 4px; color: var(--text);
-      font-family: 'Syne', sans-serif; font-size: 0.8rem;
-      cursor: pointer; transition: background 0.2s;
-    }
-    .ntfy-save:hover { background: #2e2e2e; }
     .ntfy-hint {
-      margin-top: 8px; font-family: 'Space Mono', monospace;
+      font-family: 'Space Mono', monospace;
       font-size: 0.6rem; color: var(--muted);
     }
 
@@ -267,13 +258,9 @@
 
   <div class="ntfy-section">
     <label>📱 phone notifications (via ntfy.sh)</label>
-    <div class="ntfy-row">
-      <input type="text" class="ntfy-input" id="ntfyTopic" placeholder="your-unique-topic-name" />
-      <button class="ntfy-save" onclick="saveTopic()">Save</button>
-    </div>
+    <div class="ntfy-topic-display">topic: donk-tracker</div>
     <div class="ntfy-hint">
-      1. Install the <strong>ntfy</strong> app → subscribe to your topic name above<br>
-      2. Notifications fire on every state change automatically
+      Install the <strong>ntfy</strong> app and subscribe to <strong>donk-tracker</strong> to receive push notifications on every state change.
     </div>
   </div>
 
@@ -307,8 +294,7 @@
     // ============================================================
     let isMad      = false;
     let history    = [];
-    let ntfyTopic  = localStorage.getItem('ntfyTopic') || '';
-    if (ntfyTopic) document.getElementById('ntfyTopic').value = ntfyTopic;
+    const NTFY_TOPIC = 'donk-tracker';
 
     // Load history
     try {
@@ -359,14 +345,12 @@
     // NTFY
     // ============================================================
     async function sendNotification(mad) {
-      const topic = ntfyTopic.trim();
-      if (!topic) return;
       try {
-        await fetch(`https://ntfy.sh/${topic}`, {
+        await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            topic,
+            topic:   NTFY_TOPIC,
             title:   mad ? "😤 Donk is MAD" : "😊 Donk has calmed down",
             message: mad ? "Donk is currently mad at you. Good luck." : "Anger resolved. You're in the clear.",
             priority: mad ? 5 : 3,
@@ -375,12 +359,6 @@
         });
       } catch(e) { console.warn("ntfy failed:", e); }
     }
-
-    window.saveTopic = function() {
-      ntfyTopic = document.getElementById('ntfyTopic').value.trim();
-      localStorage.setItem('ntfyTopic', ntfyTopic);
-      showToast("📱 Notification topic saved!");
-    };
 
     // ============================================================
     // RENDER
