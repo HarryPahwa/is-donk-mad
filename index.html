@@ -332,12 +332,12 @@
       try {
         const snap  = await getDocs(collection(db, "events"));
         const batch = writeBatch(db);
-        snap.docs.forEach(d => batch.delete(doc(db, "events", d.id)));
-        await batch.commit();
-        history = [];
-        isMad   = false;
+        //snap.docs.forEach(d => batch.delete(doc(db, "events", d.id)));
+        //await batch.commit();
+        //history = [];
+        //isMad   = false;
         renderAll();
-        showToast("🗑 History cleared");
+        //showToast("🗑 History cleared");
       } catch(e) { console.error("Clear failed:", e); }
     };
 
